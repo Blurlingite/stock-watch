@@ -1,8 +1,16 @@
 import Link from "next/link";
 import Image from "next/image";
+import {Toaster} from "sonner";
+import {auth} from "@/lib/better-auth/auth";
+import {redirect} from "next/navigation";
+import {headers} from "next/headers";
 
 
 const Layout = async ({ children }: { children : React.ReactNode }) => {
+
+    const session = await auth.api.getSession({ headers: await headers() })
+
+    if(session?.user) redirect('/')
 
     return (
         <main className="auth-layout">
@@ -12,6 +20,7 @@ const Layout = async ({ children }: { children : React.ReactNode }) => {
                 </Link>
 
                 <div className="pb-6 lg:pb-8 flex-1">{children}</div>
+                <Toaster />
             </section>
 
             <section className="auth-right-section">
