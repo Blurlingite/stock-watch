@@ -152,7 +152,7 @@ declare global {
         alertData: Alert[] | undefined;
     };
 
-    type MarketNewsArticle = {
+    declare interface MarketNewsArticle {
         id: number;
         headline: string;
         summary: string;
@@ -162,7 +162,7 @@ declare global {
         category: string;
         related: string;
         image?: string;
-    };
+    }
 
     type WatchlistNewsProps = {
         news?: MarketNewsArticle[];
