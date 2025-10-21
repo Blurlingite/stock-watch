@@ -4,7 +4,7 @@ import {sendNewsSummaryEmail, sendWelcomeEmail} from "@/lib/nodemailer";
 import {getAllUsersForNewsEmail} from "@/lib/actions/user.actions";
 import {getFormattedTodayDate} from "@/lib/utils";
 import {getNews} from "@/lib/actions/finnhub.actions";
-import {getWatchlistSymbolsByEmail} from "@/lib/actions/watchlist.actions";
+import {getAllWatchlists, getWatchlistSymbolsByEmail} from "@/lib/actions/watchlist.actions";
 
 export const sendSignUpEmail = inngest.createFunction(
     { id: "sign-up-email" },
@@ -121,3 +121,38 @@ export const sendDailyNewsSummary = inngest.createFunction(
 
     }
 )
+
+// sends email when a stock(s) price falls within their specified range in the watchlist
+export const sendWatchlistStockRangeEmail = inngest.createFunction(
+    {id: "watchlist-stock-range" },
+    [{event: "app/send.watchlist.range"}, {cron: "0 12 * * *"}],
+
+    async ({ step }) => {
+
+        // Step 1:  get all watchlists
+
+        const watchlists = await step.run("get-all-watchlists", getAllWatchlists)
+
+        if(!watchlists || watchlists.length === 0) return {success: false, message: 'No watchlists found for stock range email.'}
+
+        if(watchlists){
+            alert("WATCHLISTS FOUND");
+        }
+        // Step 2: Go through all watchlists, access userID, symbol, minValue and maxValue,
+        // Then use the symbol to check what the current price is
+        // Then see if it falls between minValue & maxValue
+        // If it does, send an email to that user's email (use their userId to get email from users table)
+
+        for (const watchlist of watchlists) {
+            const userId = watchlist.userId;
+            const symbol = watchlist.symbol;
+            const minValue = watchlist.minValue;
+            const maxValue = watchlist.maxValue;
+
+
+
+        }
+        // Step 3: 
+
+    }
+    )

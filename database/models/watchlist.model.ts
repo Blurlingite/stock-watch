@@ -6,7 +6,9 @@ export interface WatchlistItem extends Document {
     userId: string;
     symbol: string;
     company: string;
-    addedAt: Date;
+    addedAt: Date,
+    minValue?: number;
+    maxValue?: number;
 }
 
 const WatchlistSchema = new Schema<WatchlistItem>(
@@ -15,6 +17,8 @@ const WatchlistSchema = new Schema<WatchlistItem>(
         symbol: { type: String, required: true, uppercase: true, trim: true },
         company: { type: String, required: true, trim: true },
         addedAt: { type: Date, default: Date.now },
+        minValue: { type: Number, required: false },
+        maxValue: { type: Number, required: false },
     },
     { timestamps: false }
 );

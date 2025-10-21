@@ -178,3 +178,18 @@ export const searchStocks = cache(async (query?: string): Promise<StockWithWatch
         return [];
     }
 });
+
+export const getStockPrice = async(symbol:string)=>{
+    try {
+        const url = `${FINNHUB_BASE_URL}/quote?${symbol}`
+        // Revalidate every hour
+        const quote = await fetchJSON<any>(url, 3600);
+        return { symbol, quote } as { symbol: string; quote: StockQuote };
+    } catch (e) {
+        console.error("Error fetching profile2 for", symbol, e);
+        return { symbol, quote: null } as { symbol: string; quote: null };
+    }
+
+}
+
+

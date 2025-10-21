@@ -103,6 +103,7 @@ declare global {
     };
 
     type WatchlistButtonProps = {
+        userId: string;
         symbol: string;
         company: string;
         isInWatchlist: boolean;
@@ -215,6 +216,17 @@ declare global {
         threshold: number;
         changePercent?: number;
     };
+
+    // https://finnhub.io/docs/api/quote
+    type StockQuote = {
+        c: string;
+        d: string;
+        dp: string;
+        h: string;
+        l: string;
+        o: string;
+        pc: string;
+    }
 }
 
 export {};
