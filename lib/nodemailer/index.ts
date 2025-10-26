@@ -1,6 +1,10 @@
 import nodemailer from "nodemailer";
-import {NEWS_SUMMARY_EMAIL_TEMPLATE, WELCOME_EMAIL_TEMPLATE} from "@/lib/nodemailer/templates";
-import {email} from "zod";
+import {
+    NEWS_SUMMARY_EMAIL_TEMPLATE,
+    STOCK_ALERT_LOWER_EMAIL_TEMPLATE,
+    WELCOME_EMAIL_TEMPLATE
+} from "@/lib/nodemailer/templates";
+import {date, email} from "zod";
 
 export const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -38,6 +42,30 @@ export const sendNewsSummaryEmail = async (
         to: email,
         subject: `📈 Market News Summary Today - ${date}`,
         text: `Today's market news summary from Stock Watch`,
+        html: htmlTemplate,
+    };
+
+    await transporter.sendMail(mailOptions);
+};
+
+
+// sends email to user if stock is equal to or below their minimum value
+export const sendMinValueStockEmail = async (
+    { email, symbol, company, currentPrice, targetPrice, timestamp }: { email: string; symbol: string; company: string; currentPrice: string; targetPrice: string; timestamp: string }
+): Promise<void> => {
+
+    const htmlTemplate = STOCK_ALERT_LOWER_EMAIL_TEMPLATE
+        .replace(/{{symbol}}/g, symbol)
+        .replace(/{{company}}/g, company)
+        .replace(/{{currentPrice}}/g, currentPrice)
+        .replace(/{{targetPrice}}/g, targetPrice)
+        .replace(/{{timestamp}}/g, timestamp);
+
+    const mailOptions = {
+        from: `"Stock Watch News" <stockwatch@gmail.com>`,
+        to: email,
+        subject: `📈 ${symbol} price is around ${targetPrice}!`,
+        text: `Your stock alert from Stock Watch`,
         html: htmlTemplate,
     };
 

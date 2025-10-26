@@ -1,6 +1,7 @@
 "use server"
 
 import {connectToDatabase} from '@/database/mongoose';
+import {ObjectId} from "bson";
 
 export const getAllUsersForNewsEmail = async () => {
     try {
@@ -21,5 +22,19 @@ export const getAllUsersForNewsEmail = async () => {
     } catch (e) {
         console.error('Error fetching users for news email:', e)
         return []
+    }
+}
+
+export const getUserById = async (userId: string) => {
+    try {
+        const mongooseInstance = await connectToDatabase();
+        const db = mongooseInstance.connection.db;
+        if (!db) throw new Error('Mongoose connection not connected');
+
+        return await db.collection('user').findOne({ _id: new ObjectId(userId) });
+
+    } catch (e) {
+        console.error('Error fetching user for news email:', e);
+        return null;
     }
 }
