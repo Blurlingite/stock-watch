@@ -97,14 +97,16 @@ export const WELCOME_EMAIL_TEMPLATE = `<!DOCTYPE html>
                     <!-- Header with Logo -->
                     <tr>
                         <td align="left" class="mobile-header-padding" style="padding: 40px 40px 20px 40px;">
-                            <img src="https://8upload.com/image/68e40e49cbc8b/stock-watch_logo.png" alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">
+<!--                            <img src="https://8upload.com/image/68e40e49cbc8b/stock-watch_logo.png" alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">-->
+                                <img src="https://ik.imagekit.io/vcxmno2nc/Stock%20Watch/stock-watch_logo.png?updatedAt=1761495580722" alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">
                         </td>
                     </tr>
                     
                     <!-- Dashboard Preview Image -->
                     <tr>
                         <td align="center" class="dashboard-preview" style="padding: 40px 40px 0px 40px;">
-                            <img src="https://8upload.com/image/68e40fe401bba/stock-watch-dashboard-preview.png" alt="Stock Watch Dashboard Preview" width="100%" style="max-width: 520px; width: 100%; height: auto; border-radius: 12px; border: 1px solid #30333A;">
+<!--                            <img src="https://8upload.com/image/68e40fe401bba/stock-watch-dashboard-preview.png" alt="Stock Watch Dashboard Preview" width="100%" style="max-width: 520px; width: 100%; height: auto; border-radius: 12px; border: 1px solid #30333A;">-->
+                            <img src="https://ik.imagekit.io/vcxmno2nc/Stock%20Watch/stock-watch-dashboard-preview.png?updatedAt=1761495580909" alt="Stock Watch Dashboard Preview" width="100%" style="max-width: 520px; width: 100%; height: auto; border-radius: 12px; border: 1px solid #30333A;">
                         </td>
                     </tr>
                     
@@ -260,7 +262,8 @@ export const NEWS_SUMMARY_EMAIL_TEMPLATE = `<!DOCTYPE html>
                     <!-- Header with Logo -->
                     <tr>
                         <td align="left" class="mobile-header-padding" style="padding: 40px 40px 20px 40px;">
-                            <img src="https://8upload.com/image/68e40e49cbc8b/stock-watch_logo.png" alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">
+<!--                            <img src="https://8upload.com/image/68e40e49cbc8b/stock-watch_logo.png" alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">-->
+                            <img src="https://ik.imagekit.io/vcxmno2nc/Stock%20Watch/stock-watch_logo.png?updatedAt=1761495580722" alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">
                         </td>
                     </tr>
                     
@@ -410,7 +413,8 @@ export const STOCK_ALERT_UPPER_EMAIL_TEMPLATE = `<!DOCTYPE html>
                     <!-- Header with Logo -->
                     <tr>
                         <td align="left" class="mobile-header-padding" style="padding: 40px 40px 20px 40px;">
-                            <img src="https://8upload.com/image/68e40e49cbc8b/stock-watch_logo.png alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">
+<!--                            <img src="https://8upload.com/image/68e40e49cbc8b/stock-watch_logo.png alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">-->
+                                <img src="https://ik.imagekit.io/vcxmno2nc/Stock%20Watch/stock-watch_logo.png?updatedAt=1761495580722" alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">
                         </td>
                     </tr>
                     
@@ -619,7 +623,9 @@ export const STOCK_ALERT_LOWER_EMAIL_TEMPLATE = `<!DOCTYPE html>
                     <!-- Header with Logo -->
                     <tr>
                         <td align="left" class="mobile-header-padding" style="padding: 40px 40px 20px 40px;">
-                            <img src="https://8upload.com/image/68e40e49cbc8b/stock-watch_logo.png" alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">
+<!--                            <img src="https://8upload.com/image/68e40e49cbc8b/stock-watch_logo.png" alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">-->
+                                 <img src="https://ik.imagekit.io/vcxmno2nc/Stock%20Watch/stock-watch_logo.png?updatedAt=1761495580722" alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">
+
                         </td>
                     </tr>
                     
@@ -819,7 +825,8 @@ export const VOLUME_ALERT_EMAIL_TEMPLATE = `<!DOCTYPE html>
                     <!-- Header with Logo -->
                     <tr>
                         <td align="left" class="mobile-header-padding" style="padding: 40px 40px 20px 40px;">
-                            <img src="https://8upload.com/image/68e40e49cbc8b/stock-watch_logo.png" alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">
+<!--                            <img src="https://8upload.com/image/68e40e49cbc8b/stock-watch_logo.png" alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">-->
+                                <img src="https://ik.imagekit.io/vcxmno2nc/Stock%20Watch/stock-watch_logo.png?updatedAt=1761495580722" alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">
                         </td>
                     </tr>
                     
@@ -1042,7 +1049,8 @@ export const INACTIVE_USER_REMINDER_EMAIL_TEMPLATE = `<!DOCTYPE html>
                     <!-- Header with Logo -->
                     <tr>
                         <td align="left" class="mobile-header-padding" style="padding: 40px 40px 20px 40px;">
-                            <img src="https://8upload.com/image/68e40e49cbc8b/stock-watch_logo.png" alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">
+<!--                            <img src="https://8upload.com/image/68e40e49cbc8b/stock-watch_logo.png" alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">-->
+                               <img src="https://ik.imagekit.io/vcxmno2nc/Stock%20Watch/stock-watch_logo.png?updatedAt=1761495580722" alt="Stock Watch Logo" width="150" style="max-width: 100%; height: auto;">
                         </td>
                     </tr>
                     

@@ -172,23 +172,19 @@ export const sendWatchlistStockRangeEmail = inngest.createFunction(
                 const hourString = String(hours).padStart(2, '0');
                 const timestamp = `${month}/${day}/${year} ${hourString}:${minutes} ${ampm}`;
 
-                // Safely get company name (union type)
-                const companyResult = await getStockCompanyName(symbol);
-                const company =
-                    "name" in companyResult && companyResult.name
-                        ? companyResult.name
-                        : "Unknown Company";
-
-                console.log(company);
+               // Safely get company name (union type)
+                const companyName = await getStockCompanyName(symbol);
 
                 emailsToSend.push({
                     email: user.email,
                     symbol,
-                    company: company.toString(),
+                    company: companyName,
                     currentPrice: stockPrice.quote.c.toString(),
                     targetPrice: minValue.toString(),
                     timestamp
                 });
+
+
             }
         }
 

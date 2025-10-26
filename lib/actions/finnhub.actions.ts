@@ -199,11 +199,11 @@ export const getStockCompanyName = async (symbol: string) => {
         const token = process.env.FINNHUB_API_KEY ?? NEXT_PUBLIC_FINNHUB_API_KEY;
         if (!token) throw new Error("Finnhub API key missing");
         const url = `${FINNHUB_BASE_URL}/stock/profile2?symbol=${encodeURIComponent(symbol)}&token=${token}`;
-        const name = await fetchJSON<any>(url, 3600);
-        return { symbol, name } as { symbol: string; name: string };
+        const companyResult = await fetchJSON<any>(url, 3600);
+        return companyResult.name;
     } catch (e) {
         console.error("Error fetching name for", symbol, e);
-        return { symbol, quote: null } as { symbol: string; quote: null };
+        return null;
     }
 };
 
