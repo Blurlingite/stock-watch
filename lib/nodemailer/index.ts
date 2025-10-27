@@ -5,6 +5,7 @@ import {
     WELCOME_EMAIL_TEMPLATE
 } from "@/lib/nodemailer/templates";
 import {date, email} from "zod";
+import {escapeHtml} from "@/lib/utils";
 
 export const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -13,6 +14,7 @@ export const transporter = nodemailer.createTransport({
         pass: process.env.NODEMAILER_PASSWORD!,
     }
 })
+
 
 export const sendWelcomeEmail = async ({email, name, intro}:WelcomeEmailData) => {
     const htmlTemplate = WELCOME_EMAIL_TEMPLATE
@@ -54,12 +56,12 @@ export const sendMinValueStockEmail = async (
     { email, symbol, company, currentPrice, targetPrice, timestamp }: { email: string; symbol: string; company: string; currentPrice: string; targetPrice: string; timestamp: string }
 ): Promise<void> => {
 
-    const htmlTemplate = STOCK_ALERT_LOWER_EMAIL_TEMPLATE
-        .replace(/{{symbol}}/g, symbol)
-        .replace(/{{company}}/g, company)
-        .replace(/{{currentPrice}}/g, currentPrice)
-        .replace(/{{targetPrice}}/g, targetPrice)
-        .replace(/{{timestamp}}/g, timestamp);
+        const htmlTemplate = STOCK_ALERT_LOWER_EMAIL_TEMPLATE
+            .replace(/{{symbol}}/g, escapeHtml(symbol))
+            .replace(/{{company}}/g, escapeHtml(company))
+            .replace(/{{currentPrice}}/g, escapeHtml(currentPrice))
+            .replace(/{{targetPrice}}/g, escapeHtml(targetPrice))
+            .replace(/{{timestamp}}/g, escapeHtml(timestamp));
 
     const mailOptions = {
         from: `"Stock Watch News" <stockwatch@gmail.com>`,

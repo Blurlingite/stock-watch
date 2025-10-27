@@ -1,7 +1,7 @@
 "use server"
 
 import {connectToDatabase} from '@/database/mongoose';
-import {ObjectId} from "bson";
+import { ObjectId } from "mongodb";
 
 export const getAllUsersForNewsEmail = async () => {
     try {

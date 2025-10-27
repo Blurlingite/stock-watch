@@ -184,7 +184,7 @@ export const getStockPrice = async (symbol: string) => {
         const token = process.env.FINNHUB_API_KEY ?? NEXT_PUBLIC_FINNHUB_API_KEY;
         if (!token) throw new Error("Finnhub API key missing");
         const url = `${FINNHUB_BASE_URL}/quote?symbol=${encodeURIComponent(symbol)}&token=${token}`;
-        const quote = await fetchJSON<any>(url, 3600);
+        const quote = await fetchJSON<any>(url);
         return { symbol, quote } as { symbol: string; quote: StockQuote };
     } catch (e) {
         console.error("Error fetching quote for", symbol, e);
@@ -200,10 +200,11 @@ export const getStockCompanyName = async (symbol: string) => {
         if (!token) throw new Error("Finnhub API key missing");
         const url = `${FINNHUB_BASE_URL}/stock/profile2?symbol=${encodeURIComponent(symbol)}&token=${token}`;
         const companyResult = await fetchJSON<any>(url, 3600);
-        return companyResult.name;
+        const companyName = companyResult.name;
+        return { symbol, companyName } as { symbol: string; companyName: string };
     } catch (e) {
         console.error("Error fetching name for", symbol, e);
-        return null;
+        return { symbol, companyName: null } as { symbol: string; companyName: null };
     }
 };
 

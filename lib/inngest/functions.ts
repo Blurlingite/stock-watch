@@ -149,10 +149,10 @@ export const sendWatchlistStockRangeEmail = inngest.createFunction(
 
         for (const watchlist of watchlists) {
 
-            console.log(`Watchlist SYM is ${watchlist.symbol} & Watchlist minValue is ${watchlist.minValue}`);
             const { userId, symbol, minValue, maxValue } = watchlist;
             const stockPrice = await getStockPrice(symbol);
-
+            const min = typeof minValue === 'number' ? minValue : Number(minValue);
+            if (!Number.isFinite(min)) continue;
 
             if (stockPrice.quote && stockPrice.quote.c  <= minValue) {
                 const user = await getUserById(userId);
@@ -172,13 +172,13 @@ export const sendWatchlistStockRangeEmail = inngest.createFunction(
                 const hourString = String(hours).padStart(2, '0');
                 const timestamp = `${month}/${day}/${year} ${hourString}:${minutes} ${ampm}`;
 
-               // Safely get company name (union type)
-                const companyName = await getStockCompanyName(symbol);
+                const company = await getStockCompanyName(symbol);
+                const companyName = company?.companyName;
 
                 emailsToSend.push({
                     email: user.email,
                     symbol,
-                    company: companyName,
+                    company: companyName ?? "",
                     currentPrice: stockPrice.quote.c.toString(),
                     targetPrice: minValue.toString(),
                     timestamp
@@ -187,6 +187,7 @@ export const sendWatchlistStockRangeEmail = inngest.createFunction(
 
             }
         }
+
 
         // Step 3: Send emails in parallel for all matched alerts
         await Promise.all(
