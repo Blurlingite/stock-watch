@@ -1,9 +1,9 @@
 import {inngest} from "@/lib/inngest/client";
 import {NEWS_SUMMARY_EMAIL_PROMPT, PERSONALIZED_WELCOME_EMAIL_PROMPT} from "@/lib/inngest/prompts";
-import {sendNewsSummaryEmail, sendWelcomeEmail} from "@/lib/nodemailer";
-import {getAllUsersForNewsEmail} from "@/lib/actions/user.actions";
+import {sendMinValueStockEmail, sendNewsSummaryEmail, sendWelcomeEmail} from "@/lib/nodemailer";
+import {getAllUsersForNewsEmail, getUserById} from "@/lib/actions/user.actions";
 import {getFormattedTodayDate} from "@/lib/utils";
-import {getNews} from "@/lib/actions/finnhub.actions";
+import {getNews, getStockCompanyName, getStockPrice} from "@/lib/actions/finnhub.actions";
 import {getAllWatchlists, getWatchlistSymbolsByEmail} from "@/lib/actions/watchlist.actions";
 
 export const sendSignUpEmail = inngest.createFunction(
@@ -104,7 +104,7 @@ export const sendDailyNewsSummary = inngest.createFunction(
             }
         }
 
-        // Step #4: (placeholder) Send the emails
+        // Step #4: Send the emails
         await step.run('send-news-emails', async () => {
             await Promise.all(
                 userNewsSummaries.map(async ({ user, newsContent}) => {
@@ -123,36 +123,81 @@ export const sendDailyNewsSummary = inngest.createFunction(
 )
 
 // sends email when a stock(s) price falls within their specified range in the watchlist
+// A summary of the result is returned when this finishes executing
+// runs every minute
 export const sendWatchlistStockRangeEmail = inngest.createFunction(
-    {id: "watchlist-stock-range" },
-    [{event: "app/send.watchlist.range"}, {cron: "0 12 * * *"}],
-
+    { id: "watchlist-stock-range" },
+    [{ event: "app/send.watchlist.range" }, { cron: "* * * * *" }],
     async ({ step }) => {
 
-        // Step 1:  get all watchlists
+        // Step 1: Get all watchlists
+        const watchlists = await step.run("get-all-watchlists", getAllWatchlists);
 
-        const watchlists = await step.run("get-all-watchlists", getAllWatchlists)
-
-        if(!watchlists || watchlists.length === 0) return {success: false, message: 'No watchlists found for stock range email.'}
-
-        if(watchlists){
-            alert("WATCHLISTS FOUND");
+        if (!watchlists || watchlists.length === 0) {
+            return { success: false, message: "No watchlists found for stock range email." };
         }
-        // Step 2: Go through all watchlists, access userID, symbol, minValue and maxValue,
-        // Then use the symbol to check what the current price is
-        // Then see if it falls between minValue & maxValue
-        // If it does, send an email to that user's email (use their userId to get email from users table)
+
+        // Step 2: Loop, build the batch of alert emails to send
+        const emailsToSend: Array<{
+            email: string;
+            symbol: string;
+            company: string;
+            currentPrice: string;
+            targetPrice: string;
+            timestamp: string;
+        }> = [];
 
         for (const watchlist of watchlists) {
-            const userId = watchlist.userId;
-            const symbol = watchlist.symbol;
-            const minValue = watchlist.minValue;
-            const maxValue = watchlist.maxValue;
+
+            const { userId, symbol, minValue, maxValue } = watchlist;
+            const stockPrice = await getStockPrice(symbol);
+            const min = typeof minValue === 'number' ? minValue : Number(minValue);
+            if (!Number.isFinite(min)) continue;
+
+            if (stockPrice.quote && stockPrice.quote.c  <= minValue) {
+                const user = await getUserById(userId);
+
+                if (!user || !user.email) continue;
+
+                // Format human-readable timestamp
+                const now = new Date();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const year = now.getFullYear();
+                let hours = now.getHours();
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12;
+                const hourString = String(hours).padStart(2, '0');
+                const timestamp = `${month}/${day}/${year} ${hourString}:${minutes} ${ampm}`;
+
+                const company = await getStockCompanyName(symbol);
+                const companyName = company?.companyName;
+
+                emailsToSend.push({
+                    email: user.email,
+                    symbol,
+                    company: companyName ?? "",
+                    currentPrice: stockPrice.quote.c.toString(),
+                    targetPrice: minValue.toString(),
+                    timestamp
+                });
 
 
-
+            }
         }
-        // Step 3: 
 
+
+        // Step 3: Send emails in parallel for all matched alerts
+        await Promise.all(
+            emailsToSend.map(currentOpts => sendMinValueStockEmail(currentOpts))
+        );
+
+        return {
+            success: true,
+            sent: emailsToSend.length,
+            message: `Sent ${emailsToSend.length} watchlist alert emails.`
+        };
     }
-    )
+);
