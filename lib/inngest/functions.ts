@@ -161,7 +161,7 @@ export const sendDailyNewsSummary = inngest.createFunction(
 // runs every minute
 export const sendWatchlistStockRangeEmail = inngest.createFunction(
   { id: "watchlist-stock-range" },
-  [{ event: "app/send.watchlist.range" }, { cron: "*/15 * * * *" }],
+  [{ event: "app/send.watchlist.range" }, { cron: "* * * * *" }],
   async ({ step }) => {
     // Step 1: Get all watchlists
     const watchlists = await step.run("get-all-watchlists", getAllWatchlists);
@@ -195,67 +195,81 @@ export const sendWatchlistStockRangeEmail = inngest.createFunction(
     for (const watchlist of watchlists) {
       const { userId, symbol, minValue, maxValue } = watchlist;
       const stockPrice = await getStockPrice(symbol);
+      // const min = typeof minValue === "number" ? minValue : Number(minValue);
+      // if (!Number.isFinite(min)) continue;
+
+      // if (stockPrice.quote && stockPrice.quote.c <= minValue) {
+
       const min = typeof minValue === "number" ? minValue : Number(minValue);
-      if (!Number.isFinite(min)) continue;
+      const max = typeof maxValue === "number" ? maxValue : Number(maxValue);
+      const hasMin = Number.isFinite(min);
+      const hasMax = Number.isFinite(max);
+      let stockPriceNum;
 
-      if (stockPrice.quote && stockPrice.quote.c <= minValue) {
-        const user = await getUserById(userId);
+      if (!hasMin && !hasMax) continue;
 
-        if (!user || !user.email) continue;
+      if (stockPrice.quote) {
+        stockPriceNum = Number(stockPrice.quote.c);
 
-        // Format human-readable timestamp
-        const now = new Date();
-        const month = String(now.getMonth() + 1).padStart(2, "0");
-        const day = String(now.getDate()).padStart(2, "0");
-        const year = now.getFullYear();
-        let hours = now.getHours();
-        const minutes = String(now.getMinutes()).padStart(2, "0");
-        const ampm = hours >= 12 ? "PM" : "AM";
-        hours = hours % 12;
-        hours = hours ? hours : 12;
-        const hourString = String(hours).padStart(2, "0");
-        const timestamp = `${month}/${day}/${year} ${hourString}:${minutes} ${ampm}`;
+        if (hasMin && stockPrice.quote && stockPriceNum <= min) {
+          const user = await getUserById(userId);
 
-        const company = await getStockCompanyName(symbol);
-        const companyName = company?.companyName;
+          if (!user || !user.email) continue;
 
-        minValEmailsToSend.push({
-          email: user.email,
-          symbol,
-          company: companyName ?? "",
-          currentPrice: stockPrice.quote.c.toString(),
-          targetPrice: minValue.toString(),
-          timestamp,
-        });
-      } else if (stockPrice.quote && stockPrice.quote.c >= maxValue) {
-        const user = await getUserById(userId);
+          // Format human-readable timestamp
+          const now = new Date();
+          const month = String(now.getMonth() + 1).padStart(2, "0");
+          const day = String(now.getDate()).padStart(2, "0");
+          const year = now.getFullYear();
+          let hours = now.getHours();
+          const minutes = String(now.getMinutes()).padStart(2, "0");
+          const ampm = hours >= 12 ? "PM" : "AM";
+          hours = hours % 12;
+          hours = hours ? hours : 12;
+          const hourString = String(hours).padStart(2, "0");
+          const timestamp = `${month}/${day}/${year} ${hourString}:${minutes} ${ampm}`;
 
-        if (!user || !user.email) continue;
+          const company = await getStockCompanyName(symbol);
+          const companyName = company?.companyName;
 
-        // Format human-readable timestamp
-        const now = new Date();
-        const month = String(now.getMonth() + 1).padStart(2, "0");
-        const day = String(now.getDate()).padStart(2, "0");
-        const year = now.getFullYear();
-        let hours = now.getHours();
-        const minutes = String(now.getMinutes()).padStart(2, "0");
-        const ampm = hours >= 12 ? "PM" : "AM";
-        hours = hours % 12;
-        hours = hours ? hours : 12;
-        const hourString = String(hours).padStart(2, "0");
-        const timestamp = `${month}/${day}/${year} ${hourString}:${minutes} ${ampm}`;
+          minValEmailsToSend.push({
+            email: user.email,
+            symbol,
+            company: companyName ?? "",
+            currentPrice: stockPriceNum.toString(),
+            targetPrice: min.toString(),
+            timestamp,
+          });
+        } else if (stockPrice.quote && stockPriceNum >= maxValue) {
+          const user = await getUserById(userId);
 
-        const company = await getStockCompanyName(symbol);
-        const companyName = company?.companyName;
+          if (!user || !user.email) continue;
 
-        maxValEmailsToSend.push({
-          email: user.email,
-          symbol,
-          company: companyName ?? "",
-          currentPrice: stockPrice.quote.c.toString(),
-          targetPrice: maxValue.toString(),
-          timestamp,
-        });
+          // Format human-readable timestamp
+          const now = new Date();
+          const month = String(now.getMonth() + 1).padStart(2, "0");
+          const day = String(now.getDate()).padStart(2, "0");
+          const year = now.getFullYear();
+          let hours = now.getHours();
+          const minutes = String(now.getMinutes()).padStart(2, "0");
+          const ampm = hours >= 12 ? "PM" : "AM";
+          hours = hours % 12;
+          hours = hours ? hours : 12;
+          const hourString = String(hours).padStart(2, "0");
+          const timestamp = `${month}/${day}/${year} ${hourString}:${minutes} ${ampm}`;
+
+          const company = await getStockCompanyName(symbol);
+          const companyName = company?.companyName;
+
+          maxValEmailsToSend.push({
+            email: user.email,
+            symbol,
+            company: companyName ?? "",
+            currentPrice: stockPriceNum.toString(),
+            targetPrice: max.toString(),
+            timestamp,
+          });
+        }
       }
     }
 
