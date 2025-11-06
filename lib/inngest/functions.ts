@@ -156,9 +156,6 @@ export const sendDailyNewsSummary = inngest.createFunction(
   }
 );
 
-// sends email when a stock(s) price falls within their specified range in the watchlist
-// A summary of the result is returned when this finishes executing
-// runs every minute
 export const sendWatchlistStockRangeEmail = inngest.createFunction(
   { id: "watchlist-stock-range" },
   [{ event: "app/send.watchlist.range" }, { cron: "* * * * *" }],
@@ -193,83 +190,87 @@ export const sendWatchlistStockRangeEmail = inngest.createFunction(
     }> = [];
 
     for (const watchlist of watchlists) {
-      const { userId, symbol, minValue, maxValue } = watchlist;
-      const stockPrice = await getStockPrice(symbol);
-      // const min = typeof minValue === "number" ? minValue : Number(minValue);
-      // if (!Number.isFinite(min)) continue;
+      try {
+        const { userId, symbol, minValue, maxValue } = watchlist;
+        const stockPrice = await getStockPrice(symbol);
 
-      // if (stockPrice.quote && stockPrice.quote.c <= minValue) {
+        const min = typeof minValue === "number" ? minValue : Number(minValue);
+        const max = typeof maxValue === "number" ? maxValue : Number(maxValue);
+        const hasMin = Number.isFinite(min);
+        const hasMax = Number.isFinite(max);
+        let stockPriceNum;
 
-      const min = typeof minValue === "number" ? minValue : Number(minValue);
-      const max = typeof maxValue === "number" ? maxValue : Number(maxValue);
-      const hasMin = Number.isFinite(min);
-      const hasMax = Number.isFinite(max);
-      let stockPriceNum;
+        if (!hasMin && !hasMax) continue;
 
-      if (!hasMin && !hasMax) continue;
+        if (stockPrice.quote) {
+          stockPriceNum = Number(stockPrice.quote.c);
 
-      if (stockPrice.quote) {
-        stockPriceNum = Number(stockPrice.quote.c);
+          if (hasMin && stockPrice.quote && stockPriceNum <= min) {
+            const user = await getUserById(userId);
 
-        if (hasMin && stockPrice.quote && stockPriceNum <= min) {
-          const user = await getUserById(userId);
+            if (!user || !user.email) continue;
 
-          if (!user || !user.email) continue;
+            // Format human-readable timestamp
+            const now = new Date();
+            const month = String(now.getMonth() + 1).padStart(2, "0");
+            const day = String(now.getDate()).padStart(2, "0");
+            const year = now.getFullYear();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, "0");
+            const ampm = hours >= 12 ? "PM" : "AM";
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const hourString = String(hours).padStart(2, "0");
+            const timestamp = `${month}/${day}/${year} ${hourString}:${minutes} ${ampm}`;
 
-          // Format human-readable timestamp
-          const now = new Date();
-          const month = String(now.getMonth() + 1).padStart(2, "0");
-          const day = String(now.getDate()).padStart(2, "0");
-          const year = now.getFullYear();
-          let hours = now.getHours();
-          const minutes = String(now.getMinutes()).padStart(2, "0");
-          const ampm = hours >= 12 ? "PM" : "AM";
-          hours = hours % 12;
-          hours = hours ? hours : 12;
-          const hourString = String(hours).padStart(2, "0");
-          const timestamp = `${month}/${day}/${year} ${hourString}:${minutes} ${ampm}`;
+            const company = await getStockCompanyName(symbol);
+            const companyName = company?.companyName;
 
-          const company = await getStockCompanyName(symbol);
-          const companyName = company?.companyName;
+            minValEmailsToSend.push({
+              email: user.email,
+              symbol,
+              company: companyName ?? "",
+              currentPrice: stockPriceNum.toString(),
+              targetPrice: min.toString(),
+              timestamp,
+            });
+          } else if (stockPrice.quote && stockPriceNum >= maxValue) {
+            const user = await getUserById(userId);
 
-          minValEmailsToSend.push({
-            email: user.email,
-            symbol,
-            company: companyName ?? "",
-            currentPrice: stockPriceNum.toString(),
-            targetPrice: min.toString(),
-            timestamp,
-          });
-        } else if (stockPrice.quote && stockPriceNum >= maxValue) {
-          const user = await getUserById(userId);
+            if (!user || !user.email) continue;
 
-          if (!user || !user.email) continue;
+            // Format human-readable timestamp
+            const now = new Date();
+            const month = String(now.getMonth() + 1).padStart(2, "0");
+            const day = String(now.getDate()).padStart(2, "0");
+            const year = now.getFullYear();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, "0");
+            const ampm = hours >= 12 ? "PM" : "AM";
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const hourString = String(hours).padStart(2, "0");
+            const timestamp = `${month}/${day}/${year} ${hourString}:${minutes} ${ampm}`;
 
-          // Format human-readable timestamp
-          const now = new Date();
-          const month = String(now.getMonth() + 1).padStart(2, "0");
-          const day = String(now.getDate()).padStart(2, "0");
-          const year = now.getFullYear();
-          let hours = now.getHours();
-          const minutes = String(now.getMinutes()).padStart(2, "0");
-          const ampm = hours >= 12 ? "PM" : "AM";
-          hours = hours % 12;
-          hours = hours ? hours : 12;
-          const hourString = String(hours).padStart(2, "0");
-          const timestamp = `${month}/${day}/${year} ${hourString}:${minutes} ${ampm}`;
+            const company = await getStockCompanyName(symbol);
+            const companyName = company?.companyName;
 
-          const company = await getStockCompanyName(symbol);
-          const companyName = company?.companyName;
-
-          maxValEmailsToSend.push({
-            email: user.email,
-            symbol,
-            company: companyName ?? "",
-            currentPrice: stockPriceNum.toString(),
-            targetPrice: max.toString(),
-            timestamp,
-          });
+            maxValEmailsToSend.push({
+              email: user.email,
+              symbol,
+              company: companyName ?? "",
+              currentPrice: stockPriceNum.toString(),
+              targetPrice: max.toString(),
+              timestamp,
+            });
+          }
         }
+      } catch (error) {
+        console.error(
+          `Error processing watchlist for symbol ${watchlist.symbol}:`,
+          error
+        );
+        continue;
       }
     }
 
