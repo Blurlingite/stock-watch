@@ -76,17 +76,25 @@ export async function checkIfInWatchlist(
   userId: string,
   symbol: string
 ): Promise<boolean> {
-  const entry = await Watchlist.findOne({ userId, symbol });
-  return !!entry;
+  try {
+    const entry = await Watchlist.findOne({ userId, symbol });
+    return !!entry;
+  } catch (err) {
+    console.error("checkIfInWatchlist error:", err);
+    return false;
+  }
 }
 
-export const getAllWatchlists = async () => {
+export const getAllWatchlists = async (): Promise<Watchlist[]> => {
   try {
     const mongoose = await connectToDatabase();
     const db = mongoose.connection.db;
     if (!db) throw new Error("MongoDB connection not found");
 
-    const watchlists = await db.collection("watchlists").find().toArray();
+    const watchlists = await db
+      .collection<Watchlist>("watchlists")
+      .find()
+      .toArray();
     return watchlists;
   } catch (e) {
     console.error("Error fetching watchlists: ", e);

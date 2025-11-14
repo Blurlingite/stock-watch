@@ -234,7 +234,7 @@ export const sendWatchlistStockRangeEmail = inngest.createFunction(
               targetPrice: min.toString(),
               timestamp,
             });
-          } else if (stockPrice.quote && stockPriceNum >= maxValue) {
+          } else if (stockPrice.quote && stockPriceNum >= Number(maxValue)) {
             const user = await getUserById(userId);
 
             if (!user || !user.email) continue;
