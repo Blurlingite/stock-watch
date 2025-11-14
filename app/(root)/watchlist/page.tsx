@@ -12,8 +12,10 @@ export default function WatchlistPage() {
 
   useEffect(() => {
     const fetchWatchlist = async () => {
-      if (!user) return;
-
+      if (!user) {
+        setLoading(false); // prevent endless spinner when logging in
+        return;
+      }
       try {
         setLoading(true);
         const userWatchlist = await getWatchlistByUserId(user.id);
