@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getWatchlistByUserId } from "@/lib/actions/watchlist.actions";
 import { useUser } from "@/components/UserContext";
+import WatchlistButton from "@/components/WatchlistButton";
 
 export default function WatchlistPage() {
   const user = useUser();
@@ -55,8 +56,8 @@ export default function WatchlistPage() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen px-4">
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+    <div className="flex justify-center px-4">
+      <section className="w-full max-w-4xl">
         <div className="flex flex-col gap-6">
           <h1 className="break-words w-full">My Watchlist</h1>
           {watchlist.length === 0 ? (
@@ -64,15 +65,43 @@ export default function WatchlistPage() {
               Your watchlist is empty. Start adding stocks to track them here.
             </p>
           ) : (
-            watchlist.map((item) => (
-              <div key={item._id} className="border p-4 rounded shadow-sm">
-                <h2>Symbol: {item.symbol}</h2>
-                <p>Company: {item.company}</p>
-                <p>Added At: {formatDate(item.addedAt)}</p>
-                <p>Max Value: {item.maxValue}</p>
-                <p>Min Value: {item.minValue}</p>
-              </div>
-            ))
+            <div className="flex flex-col gap-4">
+              {watchlist.map((item) => (
+                <div key={item._id} className="border p-4 rounded shadow-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
+                    <div className="text-center">
+                      <span className="font-semibold">Symbol:</span>{" "}
+                      {item.symbol}
+                    </div>
+                    <div className="text-center">
+                      <span className="font-semibold">Company:</span>{" "}
+                      {item.company}
+                    </div>
+                    <div className="text-center">
+                      <span className="font-semibold">Added At:</span>{" "}
+                      {formatDate(item.addedAt)}
+                    </div>
+                    <div className="text-center">
+                      <span className="font-semibold">Max Value:</span>{" "}
+                      {item.maxValue}
+                    </div>
+                    <div className="text-center">
+                      <span className="font-semibold">Min Value:</span>{" "}
+                      {item.minValue}
+                    </div>
+                    <div>
+                      {" "}
+                      <WatchlistButton
+                        symbol={item.symbol.toUpperCase()}
+                        company={item.company.toUpperCase()}
+                        userId={user.id}
+                        isInWatchlist={true}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </section>

@@ -65,10 +65,43 @@ export const addWatchlist = async ({
       }
     );
 
-    return { success: true, data: result };
+    // Convert the Mongoose document to a plain object
+    const plainResult = result ? result.toObject() : null;
+
+    // Convert _id to a string for serialization
+    if (plainResult && plainResult._id) {
+      plainResult._id = plainResult._id.toString();
+    }
+
+    return { success: true, data: plainResult };
   } catch (e) {
     console.error("Add watchlist failed", e);
     return { success: false, error: "Add watchlist failed" };
+  }
+};
+
+export const removeFromWatchlist = async ({
+  userId,
+  symbol,
+}: {
+  userId: string;
+  symbol: string;
+}) => {
+  try {
+    const mongoose = await connectToDatabase();
+    const db = mongoose.connection.db;
+    if (!db) throw new Error("MongoDB connection not found");
+
+    const result = await Watchlist.deleteOne({ userId, symbol });
+
+    if (result.deletedCount === 0) {
+      return { success: false, error: "No watchlist entry found to delete" };
+    }
+
+    return { success: true, data: result };
+  } catch (e) {
+    console.error("Remove from watchlist failed", e);
+    return { success: false, error: "Remove from watchlist failed" };
   }
 };
 
