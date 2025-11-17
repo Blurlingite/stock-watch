@@ -158,7 +158,7 @@ export const sendDailyNewsSummary = inngest.createFunction(
 
 export const sendWatchlistStockRangeEmail = inngest.createFunction(
   { id: "watchlist-stock-range" },
-  [{ event: "app/send.watchlist.range" }, { cron: "*/30 * * * *" }],
+  [{ event: "app/send.watchlist.range" }, { cron: "* * * * *" }],
   async ({ step }) => {
     // Step 1: Get all watchlists
     const watchlists = await step.run("get-all-watchlists", getAllWatchlists);

@@ -30,7 +30,7 @@ const WatchlistButton = ({
         maxValue: max,
       });
 
-      if (!response) {
+      if (!response || !response.success) {
         throw new Error("Failed to save watchlist range");
       }
       setShowWidget(false); // close the widget on success
@@ -52,20 +52,25 @@ const WatchlistButton = ({
 
   const handleClick = async () => {
     const next = !added;
-    setAdded(next);
-    onWatchlistChange?.(symbol, next);
 
     if (next) {
+      setAdded(next);
+      onWatchlistChange?.(symbol, next);
       setShowWidget(true); // Adding: show range widget
     } else {
       // Removing: call removal function
       try {
         const response = await removeFromWatchlist({ userId, symbol });
-        if (!response) throw new Error("Failed to remove from watchlist");
+        if (!response || !response.success) {
+          throw new Error(response?.error || "Failed to remove from watchlist");
+        }
+        setAdded(next);
+        onWatchlistChange?.(symbol, next);
         alert("Stock removed from watchlist!");
       } catch (err) {
         console.error(err);
         alert("Error removing from watchlist");
+        // State is not updated on error, so UI remains consistent
       }
     }
   };

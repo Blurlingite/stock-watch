@@ -39,6 +39,13 @@ export default function WatchlistPage() {
     return `${month}/${day}/${year}`;
   }
 
+  const handleWatchlistChange = (symbol: string, isAdded: boolean) => {
+    if (!isAdded) {
+      // Remove from local state so user doesn't see removed items in watchlist
+      setWatchlist((prev) => prev.filter((item) => item.symbol !== symbol));
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -96,6 +103,7 @@ export default function WatchlistPage() {
                         company={item.company.toUpperCase()}
                         userId={user.id}
                         isInWatchlist={true}
+                        onWatchlistChange={handleWatchlistChange}
                       />
                     </div>
                   </div>
