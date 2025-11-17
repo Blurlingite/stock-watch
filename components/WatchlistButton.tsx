@@ -71,6 +71,9 @@ const WatchlistButton = ({
         console.error(err);
         alert("Error removing from watchlist");
         // State is not updated on error, so UI remains consistent
+        setAdded(false);
+        onWatchlistChange?.(symbol, false);
+        setShowWidget(false);
       }
     }
   };
