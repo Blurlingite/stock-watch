@@ -7,7 +7,8 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "test:db": "node scripts/test-db.mjs"
+    "test:db": "node scripts/test-db.mjs",
+    "dev:with-inngest": "concurrently \"npx inngest-cli@latest dev\" \"npm run dev\""
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.10",
@@ -43,6 +44,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-select-country-list": "^2.2.3",
+    "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
     "react-select-country-list": "^2.2.3",
