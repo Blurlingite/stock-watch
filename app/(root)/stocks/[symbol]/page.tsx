@@ -11,12 +11,15 @@ import {
   COMPANY_FINANCIALS_WIDGET_CONFIG,
 } from "@/lib/constants";
 import { checkIfInWatchlist } from "@/lib/actions/watchlist.actions";
+import { getStockCompanyName } from "@/lib/actions/finnhub.actions";
 
 export default async function StockDetails({ params }: StockDetailsPageProps) {
   const { symbol } = await params;
   const session = await auth.api.getSession({ headers: await headers() });
   const user = session?.user;
+  const company = await getStockCompanyName(symbol);
 
+  if (!company || !company.companyName) return null;
   if (!user) return null;
 
   const isInWatchlist = user
@@ -56,7 +59,7 @@ export default async function StockDetails({ params }: StockDetailsPageProps) {
           <div className="flex items-center justify-between">
             <WatchlistButton
               symbol={symbol.toUpperCase()}
-              company={symbol.toUpperCase()}
+              company={company.companyName.toUpperCase()}
               userId={user.id}
               isInWatchlist={isInWatchlist}
             />

@@ -1,12 +1,9 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
-import RangeWidget from "./RangeWidget";
 import {
   addWatchlist,
-  getAllWatchlists,
   removeFromWatchlist,
 } from "@/lib/actions/watchlist.actions";
-import { sendWatchlistStockRangeEmail } from "@/lib/inngest/functions";
 
 const WatchlistButton = ({
   userId,
@@ -19,21 +16,42 @@ const WatchlistButton = ({
 }: WatchlistButtonProps) => {
   const [added, setAdded] = useState<boolean>(!!isInWatchlist);
   const [showWidget, setShowWidget] = useState(false);
+  const [minValue, setMinValue] = useState<string>("");
+  const [maxValue, setMaxValue] = useState<string>("");
 
-  const handleRangeSubmit = async (min: number, max: number) => {
+  // Helper to allow only up to 2 decimal places
+  const formatDecimal = (value: string) => {
+    if (value === "") return "";
+    const regex = /^\d*\.?\d{0,2}$/; // digits with up to 2 decimals
+    if (regex.test(value)) return value;
+    // If invalid, truncate to 2 decimals
+    const [integer, decimal] = value.split(".");
+    if (decimal) {
+      return `${integer}.${decimal.slice(0, 2)}`;
+    }
+    return integer;
+  };
+
+  const handleRangeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!minValue || !maxValue) {
+      alert("Please enter both min and max values");
+      return;
+    }
+
     try {
       const response = await addWatchlist({
         userId,
         symbol,
         company,
-        minValue: min,
-        maxValue: max,
+        minValue: parseFloat(minValue),
+        maxValue: parseFloat(maxValue),
       });
 
       if (!response || !response.success) {
         throw new Error("Failed to save watchlist range");
       }
-      setShowWidget(false); // close the widget on success
+      setShowWidget(false);
       alert("Watchlist range saved!");
     } catch (err) {
       console.error(err);
@@ -41,36 +59,24 @@ const WatchlistButton = ({
     }
   };
 
-  useEffect(() => {
-    setAdded(!!isInWatchlist);
-  }, [isInWatchlist]);
-
-  const label = useMemo(() => {
-    if (type === "icon") return added ? "" : "";
-    return added ? "Remove from Watchlist" : "Add to Watchlist";
-  }, [added, type]);
-
   const handleClick = async () => {
     const next = !added;
-
     if (next) {
       setAdded(next);
       onWatchlistChange?.(symbol, next);
-      setShowWidget(true); // Adding: show range widget
+      setShowWidget(true);
     } else {
-      // Removing: call removal function
       try {
         const response = await removeFromWatchlist({ userId, symbol });
-        if (!response || !response.success) {
+        if (!response?.success)
           throw new Error(response?.error || "Failed to remove from watchlist");
-        }
+
         setAdded(next);
         onWatchlistChange?.(symbol, next);
         alert("Stock removed from watchlist!");
       } catch (err) {
         console.error(err);
         alert("Error removing from watchlist");
-        // State is not updated on error, so UI remains consistent
         setAdded(false);
         onWatchlistChange?.(symbol, false);
         setShowWidget(false);
@@ -78,49 +84,10 @@ const WatchlistButton = ({
     }
   };
 
-  if (type === "icon") {
-    return (
-      <>
-        <button
-          title={
-            added
-              ? `Remove ${symbol} from watchlist`
-              : `Add ${symbol} to watchlist`
-          }
-          aria-label={
-            added
-              ? `Remove ${symbol} from watchlist`
-              : `Add ${symbol} to watchlist`
-          }
-          className={`watchlist-icon-btn ${
-            added ? "watchlist-icon-added" : ""
-          }`}
-          onClick={handleClick}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill={added ? "#FACC15" : "none"}
-            stroke="#FACC15"
-            strokeWidth="1.5"
-            className="watchlist-star"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.385a.563.563 0 00-.182-.557L3.04 10.385a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345l2.125-5.111z"
-            />
-          </svg>
-        </button>
-        {showWidget && (
-          <RangeWidget
-            onSubmit={handleRangeSubmit}
-            onClose={() => setShowWidget(false)}
-          />
-        )}
-      </>
-    );
-  }
+  const label = useMemo(() => {
+    if (type === "icon") return "";
+    return added ? "Remove from Watchlist" : "Add to Watchlist";
+  }, [added, type]);
 
   return (
     <>
@@ -146,11 +113,43 @@ const WatchlistButton = ({
         ) : null}
         <span>{label}</span>
       </button>
+
       {showWidget && (
-        <RangeWidget
-          onSubmit={handleRangeSubmit}
-          onClose={() => setShowWidget(false)}
-        />
+        <div className="range-widget-overlay">
+          <div className="range-widget-box">
+            <h3>Set Watch Range</h3>
+            <form onSubmit={handleRangeSubmit}>
+              <label>
+                Min Price:
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={minValue}
+                  onChange={(e) => setMinValue(formatDecimal(e.target.value))}
+                  placeholder="e.g. 90.25"
+                />
+              </label>
+
+              <label>
+                Max Price:
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={maxValue}
+                  onChange={(e) => setMaxValue(formatDecimal(e.target.value))}
+                  placeholder="e.g. 120.50"
+                />
+              </label>
+
+              <div className="range-actions">
+                <button type="submit">Save</button>
+                <button type="button" onClick={() => setShowWidget(false)}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </>
   );

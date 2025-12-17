@@ -254,7 +254,7 @@
     @apply w-full grid-cols-1 gap-6 xl:grid-cols-3 space-y-6 sm:space-y-8;
   }
   .watchlist-btn {
-    @apply bg-yellow-500 text-base hover:bg-yellow-500 text-gray-900 w-full rounded h-11 font-semibold cursor-pointer;
+    @apply bg-yellow-500 text-base hover:bg-yellow-500 text-gray-900 w-full rounded py-2 px-4 font-semibold cursor-pointer;
   }
   .watchlist-remove {
     @apply bg-red-500! hover:bg-red-500! text-gray-900!;
@@ -485,4 +485,82 @@
 
 .scrollbar-hide-default::-webkit-scrollbar-thumb:hover {
   background-color: #9095a1;
+}
+
+.range-widget-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+}
+
+.range-widget-box {
+  background: #121212;
+  color: #f5f5f5;
+  padding: 30px;
+  border-radius: 12px;
+  width: 400px;
+  box-shadow: 0 0 35px rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+h3 {
+  font-size: 18px;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+  font-size: 15px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  background: #1e1e1e;
+  color: #f5f5f5;
+  margin-top: 6px;
+  outline: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 15px;
+}
+
+input:focus {
+  outline: 1px solid #facc15;
+}
+
+.range-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+button {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button[type="submit"] {
+  background: #facc15;
+  color: #000;
+  font-weight: 600;
+}
+
+button[type="button"] {
+  background: #333;
+  color: #f5f5f5;
 }

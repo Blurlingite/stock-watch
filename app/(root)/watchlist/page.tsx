@@ -74,27 +74,28 @@ export default function WatchlistPage() {
           ) : (
             <div className="flex flex-col gap-4">
               {watchlist.map((item) => (
-                <div key={item._id} className="border p-4 rounded shadow-sm">
+                <div
+                  key={item._id}
+                  className="border border-white p-4 rounded shadow-sm"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
                     <div className="text-center">
-                      <span className="font-semibold">Symbol:</span>{" "}
-                      {item.symbol}
+                      <span className="font-semibold"></span> {item.symbol}
                     </div>
                     <div className="text-center">
-                      <span className="font-semibold">Company:</span>{" "}
-                      {item.company}
+                      <span className="font-semibold"></span> {item.company}
                     </div>
                     <div className="text-center">
-                      <span className="font-semibold">Added At:</span>{" "}
+                      <span className="font-semibold">Date Added:</span>{" "}
                       {formatDate(item.addedAt)}
-                    </div>
-                    <div className="text-center">
-                      <span className="font-semibold">Max Value:</span>{" "}
-                      {item.maxValue}
                     </div>
                     <div className="text-center">
                       <span className="font-semibold">Min Value:</span>{" "}
                       {item.minValue}
+                    </div>
+                    <div className="text-center">
+                      <span className="font-semibold">Max Value:</span>{" "}
+                      {item.maxValue}
                     </div>
                     <div>
                       {" "}
